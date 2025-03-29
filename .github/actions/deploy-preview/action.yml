@@ -11,6 +11,9 @@ inputs:
   vercel-project-id:
     description: 'Vercel project ID'
     required: true
+  vercel-org-id:
+    description: 'Vercel organization ID'
+    required: true
 
 outputs:
   preview-url:
@@ -39,6 +42,7 @@ runs:
       with:
         vercel-token: ${{ inputs.vercel-token }}
         vercel-project-id: ${{ inputs.vercel-project-id }}
+        vercel-org-id: ${{ inputs.vercel-org-id }}
         vercel-args: '--prebuilt'
       env:
         TURBO_TOKEN: ${{ inputs.turbo-token }} 
