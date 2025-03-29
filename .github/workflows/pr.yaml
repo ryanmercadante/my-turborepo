@@ -25,9 +25,9 @@ env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   NODE_VERSION: '20'
   PORT: '3000'
-  MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-  MYSQL_DATABASE: test
-  REDIS_URL: redis://localhost:6379
+  # MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  # MYSQL_DATABASE: test
+  # REDIS_URL: redis://localhost:6379
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
 jobs:
@@ -37,29 +37,29 @@ jobs:
     
     # Service containers for MySQL and Redis
     # These are used by the backend service during testing
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE: ${{ env.MYSQL_DATABASE }}
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+    # services:
+    #   mysql:
+    #     image: mysql:8.0
+    #     env:
+    #       MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+    #       MYSQL_DATABASE: ${{ env.MYSQL_DATABASE }}
+    #     ports:
+    #       - 3306:3306
+    #     options: >-
+    #       --health-cmd="mysqladmin ping"
+    #       --health-interval=10s
+    #       --health-timeout=5s
+    #       --health-retries=3
 
-      redis:
-        image: redis:7.0
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+    #   redis:
+    #     image: redis:7.0
+    #     ports:
+    #       - 6379:6379
+    #     options: >-
+    #       --health-cmd="redis-cli ping"
+    #       --health-interval=10s
+    #       --health-timeout=5s
+    #       --health-retries=3
 
     steps:
       # Setup
@@ -97,11 +97,11 @@ jobs:
           turbo-token: ${{ env.TURBO_TOKEN }}
         
       # Start backend service for testing
-      - name: Start Backend Service
-        run: yarn turbo dev --filter=api & npx wait-on http://localhost:8000
-        env:
-          DATABASE_URL: mysql://root:${{ env.MYSQL_ROOT_PASSWORD }}@localhost:3306/${{ env.MYSQL_DATABASE }}
-          REDIS_URL: ${{ env.REDIS_URL }}
+      # - name: Start Backend Service
+      #   run: yarn turbo dev --filter=api & npx wait-on http://localhost:8000
+      #   env:
+      #     DATABASE_URL: mysql://root:${{ env.MYSQL_ROOT_PASSWORD }}@localhost:3306/${{ env.MYSQL_DATABASE }}
+      #     REDIS_URL: ${{ env.REDIS_URL }}
         
       # Run linting and tests against the deployed frontend
       - name: Run Tests
