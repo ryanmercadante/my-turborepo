@@ -1,0 +1,27 @@
+name: Deploy Preview
+description: Deploys a preview environment using Vercel
+
+inputs:
+  vercel-token:
+    description: 'Vercel authentication token'
+    required: true
+  turbo-token:
+    description: 'Turborepo authentication token'
+    required: true
+
+outputs:
+  preview-url:
+    description: 'The preview URL of the deployment'
+    value: ${{ steps.deploy.outputs.preview-url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Deploy to Vercel
+      id: deploy
+      uses: vercel/action@v25
+      with:
+        vercel-token: ${{ inputs.vercel-token }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prebuilt --message "Preview deployment for PR #${{ github.event.pull_request.number }}"' 

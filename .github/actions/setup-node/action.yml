@@ -1,0 +1,26 @@
+name: 'Setup Node.js'
+description: 'Sets up Node.js with Yarn caching'
+
+inputs:
+  node-version:
+    description: 'Node.js version to install'
+    required: true
+    default: '20'
+
+outputs:
+  node-version:
+    description: 'The installed Node.js version'
+    value: ${{ steps.setup-node.outputs.node-version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      id: setup-node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'yarn'
+        cache-dependency-path: |
+          **/yarn.lock
+          .yarnrc.yml 
