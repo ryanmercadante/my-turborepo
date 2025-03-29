@@ -29,6 +29,7 @@ env:
   # MYSQL_DATABASE: test
   # REDIS_URL: redis://localhost:6379
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  VERCEL_PROJECT_ID: ${{ secrets.WEB_PROJECT_ID }}
 
 jobs:
   build-test-deploy:
@@ -92,6 +93,7 @@ jobs:
         with:
           vercel-token: ${{ env.VERCEL_TOKEN }}
           turbo-token: ${{ env.TURBO_TOKEN }}
+          vercel-project-id: ${{ env.WEB_PROJECT_ID }}
         
       # Start backend service for testing
       # - name: Start Backend Service

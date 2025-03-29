@@ -8,6 +8,9 @@ inputs:
   turbo-token:
     description: 'Turborepo authentication token'
     required: true
+  vercel-project-id:
+    description: 'Vercel project ID'
+    required: true
 
 outputs:
   preview-url:
@@ -35,6 +38,7 @@ runs:
       uses: amondnet/vercel-action@v25
       with:
         vercel-token: ${{ inputs.vercel-token }}
+        vercel-project-id: ${{ inputs.vercel-project-id }}
         vercel-args: '--prebuilt'
       env:
         TURBO_TOKEN: ${{ inputs.turbo-token }} 
