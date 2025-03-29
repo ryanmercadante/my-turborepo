@@ -8,6 +8,12 @@ inputs:
   turbo-token:
     description: 'Turborepo authentication token'
     required: true
+  vercel-project-id:
+    description: 'Vercel project ID'
+    required: true
+  vercel-org-id:
+    description: 'Vercel organization ID'
+    required: true
 
 outputs:
   preview-url:
@@ -17,11 +23,39 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Build Project
+      shell: bash
+      run: |
+        # Build with Turborepo for caching
+        yarn turbo build --filter=@repo/web
+        # Create Vercel output structure
+        mkdir -p .vercel/output
+        # Copy build output and create necessary metadata
+        cp -r apps/web/.next .vercel/output/build
+        echo '{"version": 3,"buildCommand": "yarn turbo build --filter=@repo/web","outputDirectory": "apps/web/.next"}' > .vercel/output/config.json
+      env:
+        TURBO_TOKEN: ${{ inputs.turbo-token }}
+
+    - name: Verify Build Output
+      shell: bash
+      run: |
+        if [ ! -d ".vercel/output/build" ]; then
+          echo "Build output directory not found"
+          exit 1
+        fi
+        if [ ! -f ".vercel/output/config.json" ]; then
+          echo "Vercel config file not found"
+          exit 1
+        fi
+        echo "Build output verified successfully"
+
     - name: Deploy to Vercel
       id: deploy
-      uses: vercel/action@v25
+      uses: amondnet/vercel-action@v25
       with:
         vercel-token: ${{ inputs.vercel-token }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prebuilt --message "Preview deployment for PR #${{ github.event.pull_request.number }}"' 
+        vercel-project-id: ${{ inputs.vercel-project-id }}
+        vercel-org-id: ${{ inputs.vercel-org-id }}
+        vercel-args: '--prebuilt'
+      env:
+        TURBO_TOKEN: ${{ inputs.turbo-token }} 

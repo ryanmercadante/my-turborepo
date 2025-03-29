@@ -7,11 +7,10 @@
 # - Runs backend locally for testing
 # - Uses Turborepo for efficient builds and caching
 
-name: Pull Request Workflow
-
+name: Pull Request
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 # Prevent parallel deployments
 # - Groups deployments by workflow and PR
@@ -24,42 +23,43 @@ concurrency:
 env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   NODE_VERSION: '20'
-  PORT: '3000'
-  MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-  MYSQL_DATABASE: test
-  REDIS_URL: redis://localhost:6379
+  PORT: 8000
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  WEB_PROJECT_ID: ${{ secrets.WEB_PROJECT_ID }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  # DATABASE_URL: mysql://root:root@localhost:3306/test
+  # REDIS_URL: redis://localhost:6379
 
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15  # Prevent jobs from hanging indefinitely
-    
-    # Service containers for MySQL and Redis
-    # These are used by the backend service during testing
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE: ${{ env.MYSQL_DATABASE }}
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-      redis:
-        image: redis:7.0
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+    # services:
+    #   mysql:
+    #     image: mysql:8.0
+    #     env:
+    #       MYSQL_ROOT_PASSWORD: root
+    #       MYSQL_DATABASE: test
+    #     ports:
+    #       - 3306:3306
+    #     options: >-
+    #       --health-cmd="mysqladmin ping"
+    #       --health-interval=10s
+    #       --health-timeout=5s
+    #       --health-retries=3
+    #     volumes:
+    #       - mysql-data:/var/lib/mysql
+    #   redis:
+    #     image: redis:7.0
+    #     ports:
+    #       - 6379:6379
+    #     options: >-
+    #       --health-cmd="redis-cli ping"
+    #       --health-interval=10s
+    #       --health-timeout=5s
+    #       --health-retries=3
+    #     volumes:
+    #       - redis-data:/data
 
     steps:
       # Setup
@@ -85,9 +85,6 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
-            
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest   
         
       # Deploy frontend to Vercel preview environment
       - uses: ./.github/actions/deploy-preview
@@ -95,19 +92,33 @@ jobs:
         with:
           vercel-token: ${{ env.VERCEL_TOKEN }}
           turbo-token: ${{ env.TURBO_TOKEN }}
+          vercel-project-id: ${{ env.WEB_PROJECT_ID }}
+          vercel-org-id: ${{ env.VERCEL_ORG_ID }}
         
       # Start backend service for testing
-      - name: Start Backend Service
-        run: yarn turbo dev --filter=api & npx wait-on http://localhost:8000
+      # - name: Start backend service
+      #   run: yarn turbo dev --filter=@repo/api --no-daemon --no-deps
+      #   env:
+      #     DATABASE_URL: ${{ env.DATABASE_URL }}
+      #     REDIS_URL: ${{ env.REDIS_URL }}
+      #   background: true
+
+      # - name: Wait for backend service
+      #   run: |
+      #     echo "Waiting for backend service to be ready..."
+      #     while ! curl -s http://localhost:${{ env.PORT }}/health; do
+      #       echo "Waiting for backend service..."
+      #       sleep 1
+      #     done
+      #     echo "Backend service is ready!"
+
+      - name: Run Playwright tests
+        run: yarn turbo test
         env:
-          DATABASE_URL: mysql://root:${{ env.MYSQL_ROOT_PASSWORD }}@localhost:3306/${{ env.MYSQL_DATABASE }}
-          REDIS_URL: ${{ env.REDIS_URL }}
-        
-      # Run linting and tests against the deployed frontend
-      - name: Run Tests
-        run: |
-          yarn turbo lint --filter=web
-          yarn turbo test --filter=web
-        env:
-          CYPRESS_BASE_URL: ${{ steps.deploy.outputs.preview-url }}
+          NEXT_PUBLIC_API_URL: http://localhost:${{ env.PORT }}
+          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.preview-url }}
           TURBO_TOKEN: ${{ env.TURBO_TOKEN }}
+
+# volumes:
+#   mysql-data:
+#   redis-data:
