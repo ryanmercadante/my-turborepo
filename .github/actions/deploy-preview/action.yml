@@ -19,7 +19,7 @@ runs:
   steps:
     - name: Build Project
       shell: bash
-      run: yarn turbo build --filter=web
+      run: yarn turbo build --filter=@repo/web
       env:
         TURBO_TOKEN: ${{ inputs.turbo-token }}
 

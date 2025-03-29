@@ -106,8 +106,8 @@ jobs:
       # Run linting and tests against the deployed frontend
       - name: Run Tests
         run: |
-          yarn turbo lint --filter=web
-          yarn turbo test --filter=web
+          yarn turbo lint --filter=@repo/web
+          yarn turbo test --filter=@repo/web
         env:
           CYPRESS_BASE_URL: ${{ steps.deploy.outputs.preview-url }}
           TURBO_TOKEN: ${{ env.TURBO_TOKEN }}
