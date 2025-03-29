@@ -19,7 +19,9 @@ runs:
   steps:
     - name: Deploy to Vercel
       id: deploy
-      uses: vercel/action@v2
+      uses: amondnet/vercel-action@v25.0.0
       with:
         vercel-token: ${{ inputs.vercel-token }}
-        vercel-args: '--prebuilt --message "Preview deployment for PR #${{ github.event.pull_request.number }}"' 
+        vercel-args: '--prebuilt --message "Preview deployment for PR #${{ github.event.pull_request.number }}"'
+      env:
+        TURBO_TOKEN: ${{ inputs.turbo-token }} 
