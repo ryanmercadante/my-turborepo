@@ -17,6 +17,12 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Build Project
+      shell: bash
+      run: yarn turbo build --filter=web
+      env:
+        TURBO_TOKEN: ${{ inputs.turbo-token }}
+
     - name: Deploy to Vercel
       id: deploy
       uses: amondnet/vercel-action@v25
