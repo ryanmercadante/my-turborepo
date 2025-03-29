@@ -22,6 +22,4 @@ runs:
       uses: vercel/action@v25
       with:
         vercel-token: ${{ inputs.vercel-token }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
         vercel-args: '--prebuilt --message "Preview deployment for PR #${{ github.event.pull_request.number }}"' 
