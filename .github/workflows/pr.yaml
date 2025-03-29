@@ -85,9 +85,6 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
-            
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest   
         
       # Deploy frontend to Vercel preview environment
       - uses: ./.github/actions/deploy-preview

@@ -19,7 +19,14 @@ runs:
   steps:
     - name: Build Project
       shell: bash
-      run: yarn turbo build --filter=@repo/web
+      run: |
+        # Build with Turborepo for caching
+        yarn turbo build --filter=@repo/web
+        # Create Vercel output structure
+        mkdir -p .vercel/output
+        # Copy build output and create necessary metadata
+        cp -r apps/web/.next .vercel/output/build
+        echo '{"version": 2,"buildCommand": "yarn turbo build --filter=@repo/web","outputDirectory": "apps/web/.next"}' > .vercel/output/config.json
       env:
         TURBO_TOKEN: ${{ inputs.turbo-token }}
 
