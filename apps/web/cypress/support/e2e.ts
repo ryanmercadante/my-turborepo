@@ -5,10 +5,10 @@ import "./commands";
 // require('./commands')
 
 // Hide XHR requests from command log
-const app = window.top;
-if (app) {
-  app.console.log = () => {};
-}
+// const app = window.top;
+// if (app) {
+//   app.console.log = () => {};
+// }
 
 // Handle uncaught exceptions
 Cypress.on("uncaught:exception", (err, runnable) => {
